@@ -5,6 +5,7 @@
   "author": "Qurt",
   "license": "MIT",
   "scripts": {
+    "test": "TODO: add tests!",
     "build": "tsc"
   },
   "bin": {

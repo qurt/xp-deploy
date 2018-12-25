@@ -1,0 +1,19 @@
+{
+  "name": "xp-deploy",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Qurt",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc"
+  },
+  "bin": {
+    "xpd": "./bin/xpd"
+  },
+  "dependencies": {
+    "@types/node": "^10.12.18",
+    "chalk": "^2.4.1",
+    "commander": "^2.19.0",
+    "typescript": "^3.2.2"
+  }
+}

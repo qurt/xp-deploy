@@ -1,6 +1,7 @@
 import chalk from "chalk";
 import * as program from "commander";
 const pkg = require("../package.json");
+const log = console.log;
 
 import XPD from "./xpd";
 
@@ -23,22 +24,13 @@ function make_red(txt: string) {
   return chalk.red(txt); //display the help text in red on the console
 }
 
-const test_config = {
-  user: "dev",
-  deployTo: "/srv/www",
-  deployFrom: "./",
-  keepReleases: 2,
-  servers: "qmoney.me",
-  "pre-deploy": () => {
-    console.log("pre deploy callback");
-  },
-  "post-deploy": () => {
-    console.log("post deploy callback");
-  }
-};
+// Load config
+let config = require(`${process.cwd()}/xpd_config.json`);
 
-const xpd = new XPD(test_config);
+const xpd = new XPD(config);
 
 if (program.deploy) {
-  xpd.deloy(program.deploy);
+  xpd.deloy(program.deploy).catch(e => {
+    log(chalk.red(e));
+  });
 }

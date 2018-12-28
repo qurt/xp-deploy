@@ -5,7 +5,8 @@
     "noImplicitAny": true,
     "removeComments": true,
     "types": ["node"],
-    "outDir": "./lib"
+    "outDir": "./lib",
+    "pretty": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "**/*.spec.ts"]

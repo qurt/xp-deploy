@@ -1,0 +1,11 @@
+{
+  "default": {
+    "user": "dev",
+    "deployTo": "/home/dev/www/test",
+    "deployFrom": "./dist",
+    "keepReleases": 2
+  },
+  "test": {
+    "servers": "qmoney.me"
+  }
+}

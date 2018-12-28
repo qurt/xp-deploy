@@ -4,9 +4,13 @@
   "main": "index.js",
   "author": "Qurt",
   "license": "MIT",
+  "engines": {
+    "node": ">=8"
+  },
   "scripts": {
     "test": "echo 'TODO: add tests!'",
-    "build": "tsc"
+    "build": "tsc",
+    "dev": "tsc -w"
   },
   "bin": {
     "xpd": "./bin/xpd"

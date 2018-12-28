@@ -6,6 +6,6 @@
     "keepReleases": 2
   },
   "test": {
-    "servers": "qmoney.me"
+    "servers": "example.com"
   }
 }

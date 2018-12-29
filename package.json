@@ -16,9 +16,12 @@
     "xpd": "./bin/xpd"
   },
   "dependencies": {
-    "@types/node": "^10.12.18",
     "chalk": "^2.4.1",
-    "commander": "^2.19.0",
+    "commander": "^2.19.0"
+    
+  },
+  "devDependencies": {
+    "@types/node": "^10.12.18",
     "typescript": "^3.2.2"
   }
 }

@@ -57,9 +57,9 @@ class XPD {
       // TODO: Добавить копирование предыдущего релиза в папку
       log("Copy files to server");
       await local(
-        `rsync --del -vr ${this.config.deployFrom} ${this.config.user}@${
+        `rsync --del -avr ${this.config.deployFrom}/ ${this.config.user}@${
           this.config.servers
-        }:${this.config.deployTo}/releases/${releaseId}`
+        }:${this.config.deployTo}/releases/${releaseId}/`
       );
       // TODO: Добавить обработку ошибки
       log("Change symlink");

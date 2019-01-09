@@ -17,6 +17,7 @@ export const local = (cmd: string): Promise<string> => {
       if (err) reject(err);
       if (stderr) reject(stderr);
       resolve(stdout);
+      console.log(`>>> ${stdout}`);
     });
   });
 };

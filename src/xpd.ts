@@ -11,10 +11,17 @@ interface IXpdEntryConfig {
   ignores?: Array<string>;
   keepReleases?: number;
   servers?: string;
+  preDeploy?: IXpdTasks;
+  postDeploy?: IXpdTasks;
 }
 
 interface IXpdConfig {
   [env: string]: IXpdEntryConfig;
+}
+
+interface IXpdTasks {
+  local: string | Array<string>;
+  remote: string | Array<string>;
 }
 
 class XPD {
@@ -45,12 +52,16 @@ class XPD {
     }
 
     try {
+      if (this.config.preDeploy) {
+        log("Run PreDeploy tasks");
+        await this.deployTasks(this.config.preDeploy);
+      }
+      log("Create release folder");
       await this.execRemote(
         `if [ ! -d ${this.config.deployTo}/releases ]; then mkdir ${
           this.config.deployTo
         }/releases; fi`
       );
-      log("Create release folder");
       await this.execRemote(
         `mkdir ${this.config.deployTo}/releases/${releaseId}`
       );
@@ -71,6 +82,10 @@ class XPD {
         mv -fT current_tmp current; fi
         `
       );
+      if (this.config.postDeploy) {
+        log("Run PostDeploy tasks");
+        await this.deployTasks(this.config.postDeploy);
+      }
       log(
         chalk.green(
           `Completed after ${new Date().getTime() - date.getTime()} ms`
@@ -85,6 +100,37 @@ class XPD {
     return await remote(this.config.user, this.config.servers, cmd).catch(e => {
       throw Error(e);
     });
+  }
+
+  private async deployTasks(tasks: IXpdTasks) {
+    const local = tasks.local;
+    const remote = tasks.remote;
+    if (local) {
+      if (typeof local === "string") {
+        await this.runTask(local, true);
+      } else {
+        for (const task of local) {
+          await this.runTask(task, true);
+        }
+      }
+    }
+    if (remote) {
+      if (typeof remote === "string") {
+        await this.runTask(remote, true);
+      } else {
+        for (const task of remote) {
+          await this.runTask(task, true);
+        }
+      }
+    }
+  }
+
+  private async runTask(cmd: string, loc: boolean) {
+    if (loc) {
+      await local(cmd);
+    } else {
+      await this.execRemote(cmd);
+    }
   }
 }
 

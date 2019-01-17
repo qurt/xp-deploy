@@ -40,7 +40,7 @@ class XPD {
 
     this.config = { ...this.globalConfig.default, ...this.globalConfig[env] };
     const date = new Date();
-    const releaseId = `${date.getUTCFullYear()}${date.getUTCMonth()}${date.getUTCDate()}${date.getHours()}${date.getUTCMinutes()}${date.getUTCSeconds()}`;
+    const releaseId = this.getReleaseId();
 
     log("Starting deployment");
     log(`${tab()}Environment: ${chalk.green(env)}`);
@@ -88,6 +88,12 @@ class XPD {
         log("Run PostDeploy tasks");
         await this.deployTasks(this.config.postDeploy);
       }
+      log("Delete old releases");
+      await this.execRemote(
+        `(ls -rd ${this.config.deployTo}/releases/*|head -n ${
+          this.config.keepReleases
+        };ls -d ${this.config.deployTo}/releases/*)|sort|uniq -u|xargs rm -rf`
+      );
       log(
         chalk.green(
           `Completed after ${new Date().getTime() - date.getTime()} ms`
@@ -168,6 +174,17 @@ class XPD {
     } else {
       throw Error("Unknown servers format");
     }
+  }
+
+  private getReleaseId(): string {
+    const date = new Date();
+    return `${date.getUTCFullYear()}${("0" + (date.getUTCMonth() + 1)).slice(
+      -2
+    )}${("0" + date.getUTCDate()).slice(-2)}${("0" + date.getHours()).slice(
+      -2
+    )}${("0" + date.getUTCMinutes()).slice(-2)}${(
+      "0" + date.getUTCSeconds()
+    ).slice(-2)}`;
   }
 }
 

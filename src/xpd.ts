@@ -27,8 +27,10 @@ interface IXpdTasks {
 class XPD {
   globalConfig: IXpdConfig;
   config: IXpdEntryConfig;
+  servers: Array<string>;
   constructor(config: IXpdConfig) {
     this.globalConfig = config;
+    this.servers = [];
   }
   async deloy(env: string) {
     // Check env is exist
@@ -51,6 +53,9 @@ class XPD {
       throw Error("Deploy folder does not exist");
     }
 
+    // Create servers pool
+    this.createServersPool(this.config.servers);
+
     try {
       if (this.config.preDeploy) {
         log("Run PreDeploy tasks");
@@ -67,11 +72,8 @@ class XPD {
       );
       // TODO: Добавить копирование предыдущего релиза в папку
       log("Copy files to server");
-      await local(
-        `rsync --del -avr ${this.config.deployFrom}/ ${this.config.user}@${
-          this.config.servers
-        }:${this.config.deployTo}/releases/${releaseId}/`
-      );
+      await this.deployRsync(releaseId);
+
       // TODO: Добавить обработку ошибки
       log("Change symlink");
       const res = await this.execRemote(
@@ -96,10 +98,33 @@ class XPD {
     }
   }
 
-  private async execRemote(cmd: string) {
-    return await remote(this.config.user, this.config.servers, cmd).catch(e => {
+  private deployRsync(releaseId: string) {
+    const pool = [];
+    for (const server of this.servers) {
+      pool.push(
+        local(
+          `rsync --del -avr ${this.config.deployFrom}/ ${
+            this.config.user
+          }@${server}:${this.config.deployTo}/releases/${releaseId}/`
+        )
+      );
+    }
+    return Promise.all(pool).catch(e => {
       throw Error(e);
     });
+  }
+
+  private async execRemote(cmd: string) {
+    const pool = [];
+    for (const server of this.servers) {
+      pool.push(remote(this.config.user, server, cmd));
+    }
+    return Promise.all(pool).catch(e => {
+      throw Error(e);
+    });
+    // return await remote(this.config.user, this.config.servers, cmd).catch(e => {
+    //   throw Error(e);
+    // });
   }
 
   private async deployTasks(tasks: IXpdTasks) {
@@ -130,6 +155,18 @@ class XPD {
       await local(cmd);
     } else {
       await this.execRemote(cmd);
+    }
+  }
+
+  private createServersPool(servers: string | Array<string>) {
+    if (typeof servers === "string") {
+      this.servers.push(servers);
+    } else if (typeof servers === "object") {
+      for (const server of servers) {
+        this.servers.push(server);
+      }
+    } else {
+      throw Error("Unknown servers format");
     }
   }
 }

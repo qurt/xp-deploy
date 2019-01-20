@@ -147,10 +147,10 @@ class XPD {
     }
     if (remote) {
       if (typeof remote === "string") {
-        await this.runTask(remote, true);
+        await this.runTask(remote, false);
       } else {
         for (const task of remote) {
-          await this.runTask(task, true);
+          await this.runTask(task, false);
         }
       }
     }

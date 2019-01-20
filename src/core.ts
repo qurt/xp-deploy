@@ -15,7 +15,8 @@ export const local = (cmd: string): Promise<string> => {
   return new Promise((resolve, reject) => {
     exec(cmd, (err, stdout, stderr) => {
       if (err) reject(err);
-      if (stderr) reject(stderr);
+      // TODO: Сделать нормальный вывод ошибок
+      if (stderr) resolve(stderr);
       resolve(stdout);
       console.log(`>>> ${stdout}`);
     });

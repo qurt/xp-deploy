@@ -4,7 +4,7 @@
     "target": "es2017",
     "noImplicitAny": true,
     "removeComments": true,
-    "types": ["node"],
+    "types": ["node", "jest"],
     "outDir": "./lib",
     "pretty": true
   },

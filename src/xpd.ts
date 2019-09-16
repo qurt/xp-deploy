@@ -32,7 +32,7 @@ class XPD {
     this.globalConfig = config;
     this.servers = [];
   }
-  async deloy(env: string) {
+  async deploy(env: string) {
     // Check env is exist
     if (!this.globalConfig[env]) {
       throw Error(`Environment ${env} does not exist in config file!`);
@@ -40,7 +40,7 @@ class XPD {
 
     this.config = { ...this.globalConfig.default, ...this.globalConfig[env] };
     const date = new Date();
-    const releaseId = this.getReleaseId();
+    const releaseId = XPD.getReleaseId();
 
     log("Starting deployment");
     log(`${tab()}Environment: ${chalk.green(env)}`);
@@ -76,7 +76,7 @@ class XPD {
 
       // TODO: Добавить обработку ошибки
       log("Change symlink");
-      const res = await this.execRemote(
+      await this.execRemote(
         `cd ${this.config.deployTo} && 
         if [ -d current ] && [ ! -L current ]; then 
         echo "ERR: could not make symlink"; else 
@@ -167,7 +167,7 @@ class XPD {
   private createServersPool(servers: string | Array<string>) {
     if (typeof servers === "string") {
       this.servers.push(servers);
-    } else if (typeof servers === "object") {
+    } else if (Array.isArray(servers)) {
       for (const server of servers) {
         this.servers.push(server);
       }
@@ -176,7 +176,7 @@ class XPD {
     }
   }
 
-  private getReleaseId(): string {
+  private static getReleaseId(): string {
     const date = new Date();
     return `${date.getUTCFullYear()}${("0" + (date.getUTCMonth() + 1)).slice(
       -2

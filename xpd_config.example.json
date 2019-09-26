@@ -3,7 +3,8 @@
     "user": "dev",
     "deployTo": "/home/dev/www/test",
     "deployFrom": "./dist",
-    "keepReleases": 2
+    "keepReleases": 2,
+    "copy": false
   },
   "test": {
     "servers": "test.example.com",

@@ -5,13 +5,13 @@ import { accessSync, constants } from "fs";
 const log = console.log;
 
 interface IXpdEntryConfig {
-  user?: string;
-  deployTo?: string;
-  deployFrom?: string;
+  user: string;
+  deployTo: string;
+  deployFrom: string;
   ignores?: Array<string>;
   keepReleases?: number;
   copy?: boolean;
-  servers?: string;
+  servers: string;
   preDeploy?: IXpdTasks;
   postDeploy?: IXpdTasks;
 }

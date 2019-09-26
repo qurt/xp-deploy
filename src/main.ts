@@ -30,7 +30,7 @@ let config = require(`${process.cwd()}/xpd_config.json`);
 const xpd = new XPD(config);
 
 if (program.deploy) {
-  xpd.deloy(program.deploy).catch(e => {
+  xpd.deploy(program.deploy).catch(e => {
     log(chalk.red(e));
   });
 }

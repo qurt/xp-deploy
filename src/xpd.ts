@@ -1,5 +1,5 @@
 import chalk from "chalk";
-import { tab, remote, local } from "./core";
+import { tab, remote, local, computeReleaseDirname, equalValues } from "./core";
 import { accessSync, constants } from "fs";
 
 const log = console.log;
@@ -10,6 +10,7 @@ interface IXpdEntryConfig {
   deployFrom?: string;
   ignores?: Array<string>;
   keepReleases?: number;
+  copy?: boolean;
   servers?: string;
   preDeploy?: IXpdTasks;
   postDeploy?: IXpdTasks;
@@ -63,23 +64,17 @@ class XPD {
       }
       log("Create release folder");
       await this.execRemote(
-        `if [ ! -d ${this.config.deployTo}/releases ]; then mkdir ${
-          this.config.deployTo
-        }/releases; fi`
+        `if [ ! -d ${this.config.deployTo}/releases ]; then mkdir ${this.config.deployTo}/releases; fi`
       );
-      await this.execRemote(
-        `mkdir ${this.config.deployTo}/releases/${releaseId}`
-      );
-      // TODO: Добавить копирование предыдущего релиза в папку
+      await this.copyLastRelease(releaseId);
       log("Copy files to server");
       await this.deployRsync(releaseId);
 
-      // TODO: Добавить обработку ошибки
       log("Change symlink");
       await this.execRemote(
-        `cd ${this.config.deployTo} && 
-        if [ -d current ] && [ ! -L current ]; then 
-        echo "ERR: could not make symlink"; else 
+        `cd ${this.config.deployTo} &&
+        if [ -d current ] && [ ! -L current ]; then
+        echo "ERR: could not make symlink"; else
         ln -nfs ./releases/${releaseId} current_tmp &&
         mv -fT current_tmp current; fi
         `
@@ -90,9 +85,7 @@ class XPD {
       }
       log("Delete old releases");
       await this.execRemote(
-        `(ls -rd ${this.config.deployTo}/releases/*|head -n ${
-          this.config.keepReleases
-        };ls -d ${this.config.deployTo}/releases/*)|sort|uniq -u|xargs rm -rf`
+        `(ls -rd ${this.config.deployTo}/releases/*|head -n ${this.config.keepReleases};ls -d ${this.config.deployTo}/releases/*)|sort|uniq -u|xargs rm -rf`
       );
       log(
         chalk.green(
@@ -109,15 +102,38 @@ class XPD {
     for (const server of this.servers) {
       pool.push(
         local(
-          `rsync --del -avr ${this.config.deployFrom}/ ${
-            this.config.user
-          }@${server}:${this.config.deployTo}/releases/${releaseId}/`
+          `rsync --del -avr ${this.config.deployFrom}/ ${this.config.user}@${server}:${this.config.deployTo}/releases/${releaseId}/`
         )
       );
     }
     return Promise.all(pool).catch(e => {
       throw Error(e);
     });
+  }
+
+  private async copyLastRelease(releaseId: string) {
+    const lastRelease = await this.getCurrentReleaseName();
+    if (!lastRelease || !this.config.copy) return;
+    log(`Copy previous release to ${releaseId}`);
+    return await this.execRemote(
+      `cp -a ${this.config.deployTo}/releases/${lastRelease} ${this.config.deployTo}/releases/${releaseId}`
+    );
+  }
+
+  private async getCurrentReleaseName() {
+    const result =
+      (await this.execRemote(
+        `if [ -h ${this.config.deployTo}/current ]; then readlink ${this.config.deployTo}/current; fi`
+      )) || [];
+    const releaseDirnames = result.map(computeReleaseDirname);
+    if (!equalValues(releaseDirnames)) {
+      throw Error("Remote servers are not synced.");
+    }
+    if (!releaseDirnames[0]) {
+      log(chalk.yellow("No current release found."));
+      return null;
+    }
+    return releaseDirnames[0];
   }
 
   private async execRemote(cmd: string) {
@@ -128,9 +144,6 @@ class XPD {
     return Promise.all(pool).catch(e => {
       throw Error(e);
     });
-    // return await remote(this.config.user, this.config.servers, cmd).catch(e => {
-    //   throw Error(e);
-    // });
   }
 
   private async deployTasks(tasks: IXpdTasks) {

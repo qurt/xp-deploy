@@ -1,6 +1,6 @@
 {
   "name": "xp-deploy",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "main": "index.js",
   "description": "Universal automation and deployment tool written in JavaScript.",
   "keywords": [
@@ -9,6 +9,10 @@
     "deploy",
     "ssh"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/qurt/xp-deploy.git"
+  },
   "author": "Qurt",
   "license": "MIT",
   "engines": {

@@ -1,3 +1,5 @@
+[![version][version-badge]][package]
+
 ## Инициализация
 
 Создать файл `xpd_config.json` в корне проекта или выполнить `npx xp-deploy init`
@@ -58,3 +60,6 @@
 
 ## Запуск 
 `npx xp-deploy deploy to:test`
+
+[version-badge]: https://img.shields.io/npm/v/xp-deploy
+[package]: https://www.npmjs.com/package/xp-deploy

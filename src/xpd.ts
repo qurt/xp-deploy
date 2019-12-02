@@ -1,6 +1,6 @@
-import chalk from "chalk";
-import { tab, remote, local, computeReleaseDirname, equalValues } from "./core";
-import { accessSync, constants } from "fs";
+import chalk from 'chalk';
+import { tab, remote, local, computeReleaseDirname, equalValues } from './core';
+import { accessSync, constants } from 'fs';
 
 const log = console.log;
 
@@ -40,18 +40,29 @@ class XPD {
     }
 
     this.config = { ...this.globalConfig.default, ...this.globalConfig[env] };
-    const date = new Date();
-    const releaseId = XPD.getReleaseId();
 
-    log("Starting deployment");
+    log('Starting deployment');
     log(`${tab()}Environment: ${chalk.green(env)}`);
+
+    if (this.config.keepReleases) {
+      this.deployWithReleases();
+    } else {
+      this.deployWithoutReleases();
+    }
+  }
+
+  async deployWithReleases() {
+    const releaseId = XPD.getReleaseId();
+    const date = new Date();
+
     log(`${tab()}Release ID: ${chalk.green(releaseId)}`);
     log();
+
     // Check dist dir
     try {
       accessSync(this.config.deployFrom, constants.F_OK);
     } catch (e) {
-      throw Error("Deploy folder does not exist");
+      throw Error('Deploy folder does not exist');
     }
 
     // Create servers pool
@@ -59,18 +70,20 @@ class XPD {
 
     try {
       if (this.config.preDeploy) {
-        log("Run PreDeploy tasks");
+        log('Run PreDeploy tasks');
         await this.deployTasks(this.config.preDeploy);
       }
-      log("Create release folder");
+      log('Create release folder');
       await this.execRemote(
-        `if [ ! -d ${this.config.deployTo}/releases ]; then mkdir ${this.config.deployTo}/releases; fi`
+        `if [ ! -d ${this.config.deployTo}/releases ]; then mkdir ${
+          this.config.deployTo
+        }/releases; fi`
       );
       await this.copyLastRelease(releaseId);
-      log("Copy files to server");
+      log('Copy files to server');
       await this.deployRsync(releaseId);
 
-      log("Change symlink");
+      log('Change symlink');
       await this.execRemote(
         `cd ${this.config.deployTo} &&
         if [ -d current ] && [ ! -L current ]; then
@@ -80,12 +93,14 @@ class XPD {
         `
       );
       if (this.config.postDeploy) {
-        log("Run PostDeploy tasks");
+        log('Run PostDeploy tasks');
         await this.deployTasks(this.config.postDeploy);
       }
-      log("Delete old releases");
+      log('Delete old releases');
       await this.execRemote(
-        `(ls -rd ${this.config.deployTo}/releases/*|head -n ${this.config.keepReleases};ls -d ${this.config.deployTo}/releases/*)|sort|uniq -u|xargs rm -rf`
+        `(ls -rd ${this.config.deployTo}/releases/*|head -n ${
+          this.config.keepReleases
+        };ls -d ${this.config.deployTo}/releases/*)|sort|uniq -u|xargs rm -rf`
       );
       log(
         chalk.green(
@@ -97,14 +112,64 @@ class XPD {
     }
   }
 
-  private deployRsync(releaseId: string) {
-    const pool = [];
-    for (const server of this.servers) {
-      pool.push(
-        local(
-          `rsync --del -avr ${this.config.deployFrom}/ ${this.config.user}@${server}:${this.config.deployTo}/releases/${releaseId}/`
+  async deployWithoutReleases() {
+    const date = new Date();
+
+    // Check dist dir
+    try {
+      accessSync(this.config.deployFrom, constants.F_OK);
+    } catch (e) {
+      throw Error('Deploy folder does not exist');
+    }
+
+    // Create servers pool
+    this.createServersPool(this.config.servers);
+
+    try {
+      if (this.config.preDeploy) {
+        log('Run PreDeploy tasks');
+        await this.deployTasks(this.config.preDeploy);
+      }
+
+      log('Copy files to server');
+      await this.deployRsync();
+
+
+      if (this.config.postDeploy) {
+        log('Run PostDeploy tasks');
+        await this.deployTasks(this.config.postDeploy);
+      }
+
+      log(
+        chalk.green(
+          `Completed after ${new Date().getTime() - date.getTime()} ms`
         )
       );
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  private deployRsync(releaseId?: string) {
+    const pool = [];
+    for (const server of this.servers) {
+      if (this.config.keepReleases) {
+        pool.push(
+          local(
+            `rsync --del -avr ${this.config.deployFrom}/ ${
+              this.config.user
+            }@${server}:${this.config.deployTo}/releases/${releaseId}/`
+          )
+        );
+      } else {
+        pool.push(
+          local(
+            `rsync --del -avr ${this.config.deployFrom}/ ${
+              this.config.user
+            }@${server}:${this.config.deployTo}/`
+          )
+        );
+      }
     }
     return Promise.all(pool).catch(e => {
       throw Error(e);
@@ -116,21 +181,25 @@ class XPD {
     if (!lastRelease || !this.config.copy) return;
     log(`Copy previous release to ${releaseId}`);
     return await this.execRemote(
-      `cp -a ${this.config.deployTo}/releases/${lastRelease} ${this.config.deployTo}/releases/${releaseId}`
+      `cp -a ${this.config.deployTo}/releases/${lastRelease} ${
+        this.config.deployTo
+      }/releases/${releaseId}`
     );
   }
 
   private async getCurrentReleaseName() {
     const result =
       (await this.execRemote(
-        `if [ -h ${this.config.deployTo}/current ]; then readlink ${this.config.deployTo}/current; fi`
+        `if [ -h ${this.config.deployTo}/current ]; then readlink ${
+          this.config.deployTo
+        }/current; fi`
       )) || [];
     const releaseDirnames = result.map(computeReleaseDirname);
     if (!equalValues(releaseDirnames)) {
-      throw Error("Remote servers are not synced.");
+      throw Error('Remote servers are not synced.');
     }
     if (!releaseDirnames[0]) {
-      log(chalk.yellow("No current release found."));
+      log(chalk.yellow('No current release found.'));
       return null;
     }
     return releaseDirnames[0];
@@ -150,7 +219,7 @@ class XPD {
     const local = tasks.local;
     const remote = tasks.remote;
     if (local) {
-      if (typeof local === "string") {
+      if (typeof local === 'string') {
         await this.runTask(local, true);
       } else {
         for (const task of local) {
@@ -159,7 +228,7 @@ class XPD {
       }
     }
     if (remote) {
-      if (typeof remote === "string") {
+      if (typeof remote === 'string') {
         await this.runTask(remote, false);
       } else {
         for (const task of remote) {
@@ -178,25 +247,25 @@ class XPD {
   }
 
   private createServersPool(servers: string | Array<string>) {
-    if (typeof servers === "string") {
+    if (typeof servers === 'string') {
       this.servers.push(servers);
     } else if (Array.isArray(servers)) {
       for (const server of servers) {
         this.servers.push(server);
       }
     } else {
-      throw Error("Unknown servers format");
+      throw Error('Unknown servers format');
     }
   }
 
   private static getReleaseId(): string {
     const date = new Date();
-    return `${date.getUTCFullYear()}${("0" + (date.getUTCMonth() + 1)).slice(
+    return `${date.getUTCFullYear()}${('0' + (date.getUTCMonth() + 1)).slice(
       -2
-    )}${("0" + date.getUTCDate()).slice(-2)}${("0" + date.getHours()).slice(
+    )}${('0' + date.getUTCDate()).slice(-2)}${('0' + date.getHours()).slice(
       -2
-    )}${("0" + date.getUTCMinutes()).slice(-2)}${(
-      "0" + date.getUTCSeconds()
+    )}${('0' + date.getUTCMinutes()).slice(-2)}${(
+      '0' + date.getUTCSeconds()
     ).slice(-2)}`;
   }
 }

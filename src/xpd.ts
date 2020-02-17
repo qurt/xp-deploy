@@ -164,9 +164,9 @@ class XPD {
       } else {
         pool.push(
           local(
-            `rsync --del -avr ${this.config.deployFrom}/ ${
+            `rsync ${this.config.deployFrom}/* ${
               this.config.user
-            }@${server}:${this.config.deployTo}/`
+            }@${server}:${this.config.deployTo}`
           )
         );
       }

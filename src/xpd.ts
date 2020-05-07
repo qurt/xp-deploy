@@ -1,4 +1,4 @@
-import chalk from 'chalk';
+import * as chalk from 'chalk';
 import { tab, remote, local, computeReleaseDirname, equalValues } from './core';
 import { accessSync, constants } from 'fs';
 

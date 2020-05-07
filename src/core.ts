@@ -1,6 +1,6 @@
 import { exec } from "child_process";
 import { buildSSHCommand } from "./utils/ssh";
-import chalk from "chalk";
+import * as chalk from "chalk";
 import * as path from "path";
 
 export const remote = (

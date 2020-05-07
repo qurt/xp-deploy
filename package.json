@@ -27,8 +27,8 @@
     "xpd": "./bin/xpd"
   },
   "dependencies": {
-    "chalk": "^2.4.1",
-    "commander": "^2.19.0"
+    "chalk": "^4.0.0",
+    "commander": "^5.1.0"
   },
   "devDependencies": {
     "@babel/core": "^7.6.0",

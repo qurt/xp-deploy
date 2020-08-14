@@ -1,6 +1,6 @@
 {
   "name": "xp-deploy",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "main": "index.js",
   "description": "Universal automation and deployment tool written in JavaScript.",
   "keywords": [
@@ -27,18 +27,18 @@
     "xpd": "./bin/xpd"
   },
   "dependencies": {
-    "chalk": "^4.0.0",
-    "commander": "^5.1.0"
+    "chalk": "^4.1.0",
+    "commander": "^6.0.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.6.0",
-    "@babel/preset-env": "^7.6.0",
-    "@types/jest": "^25.2.1",
-    "@types/node": "^13.13.5",
-    "babel-jest": "^26.0.1",
-    "jest": "^26.0.1",
+    "@babel/core": "^7.11.0",
+    "@babel/preset-env": "^7.11.0",
+    "@types/jest": "^26.0.8",
+    "@types/node": "^14.0.27",
+    "babel-jest": "^26.2.2",
+    "jest": "^26.2.2",
     "prettier": "^2.0.5",
-    "ts-jest": "^25.5.0",
-    "typescript": "^3.2.2"
+    "ts-jest": "^26.1.4",
+    "typescript": "^3.9.7"
   }
 }

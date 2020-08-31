@@ -1,8 +1,8 @@
 [![version][version-badge]][package]
 
-## Инициализация
+## Init
 
-Создать файл `xpd_config.json` в корне проекта или выполнить `npx xp-deploy init`
+Create an `xpd_config.json` file in the project root or execute `npx xp-deploy init`
 
 ```json
 {
@@ -38,27 +38,27 @@
 }
 ```
 
-Корневым ключом конфига является название окружения.
-В `default` можно указать параметры которые будут применяться ко всем окружениям по умолчанию. Дальнейшее использование параметров перезаписывает значения по умолчанию.
+The root key of the configuration is the name of the environment.
+In `default' you can specify parameters that will be applied to all default environments. Further use of the parameters overwrites the defaults.
 
-### Параметры
-`user` Имя пользователя для подключения.
+### Options
+`user` Username for connection.
 
-`servers` Адрес сервера для подключения. Если серверов несколько - используется массив.
+`servers` The address of the server to connect. If there are several servers, an array is used.
  
-`deployTo` Директория на сервере, куда производится деплой.
+`deployTo` Directory to deploy on server.
 
-`deployFrom` Локальная директория с дистрибутивом, относительно корня проекта
+`deployFrom` Local directory with dist.
 
-`keepReleases` Количество релизов, которые нужно оставлять на сервере.
+`keepReleases` The number of releases to be left on the server.
  
-`preDeploy` Объект, содержащий в себе команды для запуска перед загрузкой файлов на сервер. `local` для выполнения локальных команд, `remote` - для выполнения на сервере.
+`preDeploy` An object that contains commands to run before uploading files to the server. `local` to execute local commands, `remote` to execute on the server.
 
-`postDeploy` Аналогично `preDeploy` только команды выполняются после загрузки файлов.
+`postDeploy` Similarly to `preDeploy` only commands are executed after files are loaded.
 
-`copy` Указывает, копировать ли предыдущий релиз перед обновлением файлов.
+`copy` Indicates whether to copy the previous release before updating the files.
 
-## Запуск 
+## Run 
 `npx xp-deploy deploy to:test`
 
 [version-badge]: https://img.shields.io/npm/v/xp-deploy

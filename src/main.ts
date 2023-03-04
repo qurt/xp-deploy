@@ -1,4 +1,4 @@
-import * as chalk from "chalk";
+import chalk from "chalk";
 import { program } from "commander";
 import { writeFileSync } from "fs";
 const pkg = require("../package.json");

@@ -1,4 +1,4 @@
-import * as chalk from 'chalk';
+import chalk from 'chalk';
 import { tab, remote, local, computeReleaseDirname, equalValues } from './core';
 import { accessSync, constants } from 'fs';
 
@@ -75,8 +75,7 @@ class XPD {
       }
       log('Create release folder');
       await this.execRemote(
-        `if [ ! -d ${this.config.deployTo}/releases ]; then mkdir ${
-          this.config.deployTo
+        `if [ ! -d ${this.config.deployTo}/releases ]; then mkdir ${this.config.deployTo
         }/releases; fi`
       );
       await this.copyLastRelease(releaseId);
@@ -98,8 +97,7 @@ class XPD {
       }
       log('Delete old releases');
       await this.execRemote(
-        `(ls -rd ${this.config.deployTo}/releases/*|head -n ${
-          this.config.keepReleases
+        `(ls -rd ${this.config.deployTo}/releases/*|head -n ${this.config.keepReleases
         };ls -d ${this.config.deployTo}/releases/*)|sort|uniq -u|xargs rm -rf`
       );
       log(
@@ -156,16 +154,14 @@ class XPD {
       if (this.config.keepReleases) {
         pool.push(
           local(
-            `rsync --del -avr ${this.config.deployFrom}/ ${
-              this.config.user
+            `rsync --del -avr ${this.config.deployFrom}/ ${this.config.user
             }@${server}:${this.config.deployTo}/releases/${releaseId}/`
           )
         );
       } else {
         pool.push(
           local(
-            `rsync ${this.config.deployFrom}/* ${
-              this.config.user
+            `rsync ${this.config.deployFrom}/* ${this.config.user
             }@${server}:${this.config.deployTo}`
           )
         );
@@ -181,8 +177,7 @@ class XPD {
     if (!lastRelease || !this.config.copy) return;
     log(`Copy previous release to ${releaseId}`);
     return await this.execRemote(
-      `cp -a ${this.config.deployTo}/releases/${lastRelease} ${
-        this.config.deployTo
+      `cp -a ${this.config.deployTo}/releases/${lastRelease} ${this.config.deployTo
       }/releases/${releaseId}`
     );
   }
@@ -190,8 +185,7 @@ class XPD {
   private async getCurrentReleaseName() {
     const result =
       (await this.execRemote(
-        `if [ -h ${this.config.deployTo}/current ]; then readlink ${
-          this.config.deployTo
+        `if [ -h ${this.config.deployTo}/current ]; then readlink ${this.config.deployTo
         }/current; fi`
       )) || [];
     const releaseDirnames = result.map(computeReleaseDirname);

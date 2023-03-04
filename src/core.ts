@@ -1,6 +1,6 @@
 import { exec } from "child_process";
 import { buildSSHCommand } from "./utils/ssh";
-import * as chalk from "chalk";
+import chalk from "chalk";
 import * as path from "path";
 
 export const remote = (
@@ -15,7 +15,7 @@ export const local = (cmd: string): Promise<string> => {
   console.log(chalk.gray(`Run '${cmd}'`));
   return new Promise((resolve, reject) => {
     exec(cmd, (err, stdout, stderr) => {
-      if (err) reject(err);
+      if (err) { reject(err); return; }
       // TODO: Сделать нормальный вывод ошибок
       if (stderr) resolve(stderr);
       resolve(stdout);

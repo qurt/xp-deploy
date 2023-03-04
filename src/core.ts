@@ -15,7 +15,7 @@ export const local = (cmd: string): Promise<string> => {
   console.log(chalk.gray(`Run '${cmd}'`));
   return new Promise((resolve, reject) => {
     exec(cmd, (err, stdout, stderr) => {
-      if (err) reject(err);
+      if (err) { reject(err); return; }
       // TODO: Сделать нормальный вывод ошибок
       if (stderr) resolve(stderr);
       resolve(stdout);

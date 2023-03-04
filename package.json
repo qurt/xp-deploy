@@ -16,7 +16,7 @@
   "author": "Qurt",
   "license": "MIT",
   "engines": {
-    "node": ">=8"
+    "node": ">=12"
   },
   "scripts": {
     "test": "echo 'TODO: add tests!'",

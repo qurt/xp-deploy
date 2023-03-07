@@ -2,6 +2,7 @@
   "name": "xp-deploy",
   "version": "1.2.1",
   "main": "index.js",
+  "type": "module",
   "description": "Universal automation and deployment tool written in JavaScript.",
   "keywords": [
     "automation",
@@ -24,7 +25,7 @@
     "dev": "tsc -w"
   },
   "bin": {
-    "xpd": "./bin/xpd"
+    "xpd": "./bin/xpd.js"
   },
   "dependencies": {
     "chalk": "^5.2.0",

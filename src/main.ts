@@ -1,10 +1,10 @@
 import chalk from "chalk";
 import { program } from "commander";
-import { writeFileSync } from "fs";
-const pkg = require("../package.json");
+import { writeFileSync, readFileSync } from "fs";
+import pkg from "../package.json" assert {type: "json"};
 const log = console.log;
 
-import XPD from "./xpd";
+import XPD from "./xpd.js";
 
 program
   .version(pkg.version)
@@ -16,7 +16,8 @@ program
       throw new Error("Invalid argument");
     }
     // Load config
-    let config = require(`${process.cwd()}/xpd_config.json`);
+    const file = readFileSync(`${process.cwd()}/xpd_config.json`).toString();
+    const config = JSON.parse(file);
     const xpd = new XPD(config);
     xpd.deploy(environment[1]).catch(e => {
       log(chalk.red(e));

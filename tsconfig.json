@@ -1,12 +1,15 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
-    "target": "es2017",
+    "module": "ESNext",
+    "target": "ESNext",
     "noImplicitAny": true,
     "removeComments": true,
     "types": ["node", "jest"],
     "outDir": "./lib",
-    "pretty": true
+    "pretty": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "moduleResolution": "node"
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "**/*.spec.ts"]

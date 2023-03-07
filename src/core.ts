@@ -1,5 +1,5 @@
 import { exec } from "child_process";
-import { buildSSHCommand } from "./utils/ssh";
+import { buildSSHCommand } from "./utils/ssh.js";
 import chalk from "chalk";
 import * as path from "path";
 

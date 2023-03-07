@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import { tab, remote, local, computeReleaseDirname, equalValues } from './core';
+import { tab, remote, local, computeReleaseDirname, equalValues } from './core.js';
 import { accessSync, constants } from 'fs';
 
 const log = console.log;

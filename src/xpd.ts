@@ -34,7 +34,7 @@ class XPD {
     this.servers = [];
   }
   async deploy(env: string) {
-    // Check env is exist
+    // Check env is existed
     if (!this.globalConfig[env]) {
       throw Error(`Environment ${env} does not exist in config file!`);
     }
@@ -45,9 +45,9 @@ class XPD {
     log(`${tab()}Environment: ${chalk.green(env)}`);
 
     if (this.config.keepReleases) {
-      this.deployWithReleases();
+      await this.deployWithReleases();
     } else {
-      this.deployWithoutReleases();
+      await this.deployWithoutReleases();
     }
   }
 
@@ -148,28 +148,30 @@ class XPD {
     }
   }
 
-  private deployRsync(releaseId?: string) {
+  private async deployRsync(releaseId?: string) {
     const pool = [];
     for (const server of this.servers) {
       if (this.config.keepReleases) {
         pool.push(
-          local(
-            `rsync --del -avr ${this.config.deployFrom}/ ${this.config.user
-            }@${server}:${this.config.deployTo}/releases/${releaseId}/`
-          )
+            local(
+                `rsync --del -avr ${this.config.deployFrom}/ ${this.config.user
+                }@${server}:${this.config.deployTo}/releases/${releaseId}/`
+            )
         );
       } else {
         pool.push(
-          local(
-            `rsync ${this.config.deployFrom}/* ${this.config.user
-            }@${server}:${this.config.deployTo}`
-          )
+            local(
+                `rsync --del -avr ${this.config.deployFrom}/* ${this.config.user
+                }@${server}:${this.config.deployTo}`
+            )
         );
       }
     }
-    return Promise.all(pool).catch(e => {
+    try {
+      return await Promise.all(pool);
+    } catch (e) {
       throw Error(e);
-    });
+    }
   }
 
   private async copyLastRelease(releaseId: string) {

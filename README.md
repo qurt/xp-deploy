@@ -59,7 +59,24 @@ In `default' you can specify parameters that will be applied to all default envi
 `copy` Indicates whether to copy the previous release before updating the files.
 
 ## Run 
+
+### Deploy
 `npx xp-deploy deploy to:test`
+
+### Rollback
+Rollback to a previous release. This command is only available when `keepReleases` is configured.
+
+By default, rollback to the previous release (1 release back):
+```bash
+npx xp-deploy rollback to:test
+```
+
+Rollback to N releases back:
+```bash
+npx xp-deploy rollback to:test 3
+```
+
+If the specified count exceeds the available number of releases on the server, an error will be thrown.
 
 [version-badge]: https://img.shields.io/npm/v/xp-deploy
 [package]: https://www.npmjs.com/package/xp-deploy

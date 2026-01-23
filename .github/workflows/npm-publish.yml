@@ -29,13 +29,19 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 18
-          registry-url: https://registry.npmjs.org/
-      - run: npm config set //registry.npmjs.org/:_authToken=${NPM_TOKEN}
+          registry-url: 'https://registry.npmjs.org/'
+
       - run: npm ci
       - run: npm run build
+
+      - run: npm whoami
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.npm_token }}
+
       - run: npm publish --provenance --access public
-    env:
-      NPM_TOKEN: ${{secrets.npm_token}}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.npm_token }}

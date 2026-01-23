@@ -37,3 +37,5 @@ jobs:
       - run: npm ci
       - run: npm run build
       - run: npm publish --provenance --access public
+    env:
+      NPM_TOKEN: ${{secrets.npm_token}}

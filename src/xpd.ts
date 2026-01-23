@@ -51,6 +51,77 @@ class XPD {
     }
   }
 
+  async rollback(env: string, count: number = 1) {
+    // Check env is existed
+    if (!this.globalConfig[env]) {
+      throw Error(`Environment ${env} does not exist in config file!`);
+    }
+
+    this.config = { ...this.globalConfig.default, ...this.globalConfig[env] };
+
+    // Check that keepReleases is configured
+    if (!this.config.keepReleases) {
+      throw Error('Rollback is only available when keepReleases is configured');
+    }
+
+    log('Starting rollback');
+    log(`${tab()}Environment: ${chalk.green(env)}`);
+    log(`${tab()}Rollback count: ${chalk.green(count)}`);
+
+    // Create servers pool
+    this.createServersPool(this.config.servers);
+
+    try {
+      // Get all releases sorted by date (newest first)
+      const allReleases = await this.getAllReleases();
+      
+      if (allReleases.length === 0) {
+        throw Error('No releases found on server');
+      }
+
+      // Get current release
+      const currentRelease = await this.getCurrentReleaseName();
+      if (!currentRelease) {
+        throw Error('No current release found');
+      }
+
+      // Find current release index
+      const currentIndex = allReleases.indexOf(currentRelease);
+      if (currentIndex === -1) {
+        throw Error(`Current release ${currentRelease} not found in releases list`);
+      }
+
+      // Calculate target index
+      const targetIndex = currentIndex + count;
+
+      // Validate that target index is valid
+      if (targetIndex >= allReleases.length) {
+        throw Error(
+          `Cannot rollback ${count} release(s). Only ${allReleases.length - currentIndex - 1} release(s) available.`
+        );
+      }
+
+      const targetRelease = allReleases[targetIndex];
+      log(`${tab()}Current release: ${chalk.yellow(currentRelease)}`);
+      log(`${tab()}Target release: ${chalk.green(targetRelease)}`);
+
+      // Change symlink to target release
+      log('Change symlink');
+      await this.execRemote(
+        `cd ${this.config.deployTo} &&
+        if [ -d current ] && [ ! -L current ]; then
+        echo "ERR: could not make symlink"; else
+        ln -nfs ./releases/${targetRelease} current_tmp &&
+        mv -fT current_tmp current; fi
+        `
+      );
+
+      log(chalk.green(`Rollback completed successfully to release ${targetRelease}`));
+    } catch (e) {
+      throw e;
+    }
+  }
+
   async deployWithReleases() {
     const releaseId = XPD.getReleaseId();
     const date = new Date();
@@ -199,6 +270,30 @@ class XPD {
       return null;
     }
     return releaseDirnames[0];
+  }
+
+  private async getAllReleases(): Promise<Array<string>> {
+    const result = await this.execRemote(
+      `if [ -d ${this.config.deployTo}/releases ]; then ls -rd ${this.config.deployTo}/releases/* 2>/dev/null | xargs -n1 basename; fi`
+    );
+    
+    // Get releases from first server (they should all be synced)
+    const releases = result[0]?.split('\n').filter(r => r.trim().length > 0) || [];
+    
+    // Verify all servers have the same releases
+    for (let i = 1; i < result.length; i++) {
+      const serverReleases = result[i]?.split('\n').filter(r => r.trim().length > 0) || [];
+      if (releases.length !== serverReleases.length) {
+        throw Error('Remote servers have different releases. Servers are not synced.');
+      }
+      for (let j = 0; j < releases.length; j++) {
+        if (releases[j] !== serverReleases[j]) {
+          throw Error('Remote servers have different releases. Servers are not synced.');
+        }
+      }
+    }
+    
+    return releases;
   }
 
   private async execRemote(cmd: string) {

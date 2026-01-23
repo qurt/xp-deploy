@@ -45,6 +45,27 @@ program
     );
     log(chalk.green("Success!"));
   });
+program
+  .version(pkg.version)
+  .command("rollback <env> [count]")
+  .description("rollback to previous release(s)")
+  .action((env, count) => {
+    const environment = env.split(":");
+    if (!environment || environment.length !== 2) {
+      throw new Error("Invalid argument");
+    }
+    // Load config
+    const file = readFileSync(`${process.cwd()}/xpd_config.json`).toString();
+    const config = JSON.parse(file);
+    const xpd = new XPD(config);
+    const rollbackCount = count ? parseInt(count, 10) : 1;
+    if (isNaN(rollbackCount) || rollbackCount < 1) {
+      throw new Error("Rollback count must be a positive number");
+    }
+    xpd.rollback(environment[1], rollbackCount).catch(e => {
+      log(chalk.red(e));
+    });
+  });
 program.parse(process.argv);
 
 if (!process.argv.slice(2).length) {
